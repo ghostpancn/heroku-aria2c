@@ -17,7 +17,7 @@ const proxy = httpProxy.createProxyServer({
 })
 const server = http.createServer(app)
 const atob = require('atob')
-const { spawn } = require('child_process');
+const { exec } = require('child_process');
 
 // Proxy websocket
 server.on('upgrade', (req, socket, head) => {
@@ -82,28 +82,31 @@ app.get('/down', (req, res) => {
 
 	// 	}
 	// });
-	request.post({ url: acurl }, async (error, response, data) => {
+	request.post({ url: acurl }, function (error, response, data) {
 		if (!error && response.statusCode == 200) {
 			console.log('------ac------', data);
 			var dataMap = JSON.parse(data);
 			var files = dataMap['data']
 			var fileurl = files[files.length - 1]['file']
 			var cmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x15 -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
-			const subprocess = spawn(cmd, {
-				shell: true,
-				detached: true,
-				stdio: 'ignore'
+			exec(cmd, (err, stdout, stderr) => {
+				if (err) {
+					console.log(err);
+					request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
+						if (!error && response.statusCode == 200) {
+							console.log('------vpss------', data);
+						}
+					});
+					return;
+				}
+				console.log(`stdout: ${stdout}`);
+				console.log(`stderr: ${stderr}`);
+				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
+					if (!error && response.statusCode == 200) {
+						console.log('------vpss------', data);
+					}
+				});
 			})
-			subprocess.unref();
-			subprocess.on('error', function (code, signal) {
-				console.log(code);
-				console.log(signal);
-			});
-			subprocess.on('exit', function (code, signal) {
-				console.log('exit');
-				console.log(code);
-				console.log(signal);
-			});
 			res.json({
 				'fileurl': fileurl,
 				'image': image,
