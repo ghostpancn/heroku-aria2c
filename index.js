@@ -82,13 +82,13 @@ app.get('/down', (req, res) => {
 
 	// 	}
 	// });
-	request.post({ url: acurl }, function (error, response, data) {
+	request.post({ url: acurl }, async (error, response, data) => {
 		if (!error && response.statusCode == 200) {
 			console.log('------ac------', data);
 			var dataMap = JSON.parse(data);
 			var files = dataMap['data']
 			var fileurl = files[files.length - 1]['file']
-			var cmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh -D && aria2c -x15 -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh -D`
+			var cmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x15 -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			const subprocess = spawn(cmd, {
 				shell: true,
 				detached: true,
