@@ -16,6 +16,8 @@ const proxy = httpProxy.createProxyServer({
 	ws: true
 })
 const server = http.createServer(app)
+const atob = require('atob')
+const { exec } = require('child_process');
 
 // Proxy websocket
 server.on('upgrade', (req, socket, head) => {
@@ -48,6 +50,48 @@ downloads.onclick=function(){
 }
 </script>
 `)
+})
+app.get('/down', (req, res) => {
+	// https://vpdown.herokuapp.com/down?baseurl=aHR0cHM6Ly9hc2lhbmNsdWIudHYvYXBpL3NvdXJjZS8yLTM4NWgyZDczLTdxeS0=&title=dGVzdA==&image=aHR0cHM6Ly9wb3JuaW1nLnh5ei8yMDIwLzA3MTAvMWZzZHNzMDY1cGwuanBn
+	var acurl = atob(req.query.baseurl.replace('_', '/').replace('+', '-'))
+	var title = atob(req.query.title.replace('_', '/').replace('+', '-'))
+	var image = atob(req.query.image.replace('_', '/').replace('+', '-'))
+	// /#!/new/task?url=${encoded_url}&${option_key_1}=${option_value_1}&...&${option_key_n}=${option_value_n}
+
+	// https://down.vpss.me/#!/new/task?url=aHR0cHM6Ly9wb3JuaW1nLnh5ei8yMDIwLzA3MTAvMWZzZHNzMDY1cGwuanBn&out=%2ftest%2ftest.png
+
+	// https://down.vpss.me/#!/settings/rpc/set/wss/down.vpss.me/6800/jsonrpc/dG0xOTY3MjM=
+	// res.json({ 'acurl': acurl, 'title': title, 'image': image })
+	// var passurl = 'https://' + req.hostname + '/ariang/#!/settings/rpc/set/wss/' + req.hostname + '/443/jsonrpc/' + ENCODED_SECRET
+	// request(passurl, function (error, response, data) {
+	// 	if (!error && response.statusCode == 200) {
+	// 		console.log('------rpc------', data);
+
+	// 	}
+	// });
+	request.post({ url: acurl }, function (error, response, data) {
+		if (!error && response.statusCode == 200) {
+			console.log('------ac------', data);
+			var dataMap = JSON.parse(data);
+			var files = dataMap['data']
+			var fileurl = files[files.length - 1]['file']
+			var cmd = `aria2c -o "${title}.jpg" -d downloads/testa "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+			exec(cmd, (err, stdout, stderr) => {
+				if (err) {
+					console.log(err);
+					return;
+				}
+				console.log(`stdout: ${stdout}`);
+				console.log(`stderr: ${stderr}`);
+			})
+			res.json({
+				'fileurl': fileurl,
+				'image': image,
+				'title': title,
+				'cmd': cmd
+			})
+		}
+	})
 })
 server.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`))
 
@@ -82,8 +126,8 @@ if (process.env.HEROKU_APP_NAME) {
 				)
 				if (
 					parseInt(numActive) +
-						parseInt(numWaiting) +
-						parseInt(numUpload) >
+					parseInt(numWaiting) +
+					parseInt(numUpload) >
 					0
 				) {
 					console.log('preventIdling: make request to prevent idling')

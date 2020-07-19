@@ -22,8 +22,10 @@ echo "$(($(cat numUpload)+1))" > numUpload # Plus 1
 
 if [[ $2 -eq 1 ]]; then # single file
 	rclone -v --config="rclone.conf" copy "$3" "DRIVE:$RCLONE_DESTINATION" 2>&1	
+    rm -vf "$3"
 elif [[ $2 -gt 1 ]]; then # multiple file
 	rclone -v --config="rclone.conf" copy "$topPath" "DRIVE:$RCLONE_DESTINATION/${relativePath%%/*}"
+    rm -rf "$topPath"
 fi
 
 echo "$(($(cat numUpload)-1))" > numUpload # Minus 1
