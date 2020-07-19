@@ -56,6 +56,8 @@ app.get('/down', (req, res) => {
 	var acurl = atob(req.query.baseurl.replace('_', '/').replace('+', '-'))
 	var title = atob(req.query.title.replace('_', '/').replace('+', '-'))
 	var image = atob(req.query.image.replace('_', '/').replace('+', '-'))
+	var id = req.query.id
+	var host = req.host
 	// /#!/new/task?url=${encoded_url}&${option_key_1}=${option_value_1}&...&${option_key_n}=${option_value_n}
 
 	// https://down.vpss.me/#!/new/task?url=aHR0cHM6Ly9wb3JuaW1nLnh5ei8yMDIwLzA3MTAvMWZzZHNzMDY1cGwuanBn&out=%2ftest%2ftest.png
@@ -79,10 +81,20 @@ app.get('/down', (req, res) => {
 			exec(cmd, (err, stdout, stderr) => {
 				if (err) {
 					console.log(err);
+					request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
+						if (!error && response.statusCode == 200) {
+							console.log('------vpss------', data);
+						}
+					});
 					return;
 				}
 				console.log(`stdout: ${stdout}`);
 				console.log(`stderr: ${stderr}`);
+				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
+					if (!error && response.statusCode == 200) {
+						console.log('------vpss------', data);
+					}
+				});
 			})
 			res.json({
 				'fileurl': fileurl,
