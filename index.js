@@ -17,7 +17,7 @@ const proxy = httpProxy.createProxyServer({
 })
 const server = http.createServer(app)
 const atob = require('atob')
-const { spawn } = require('child_process');
+const { exec } = require('child_process');
 
 // Proxy websocket
 server.on('upgrade', (req, socket, head) => {
@@ -89,39 +89,25 @@ app.get('/down', (req, res) => {
 			var files = dataMap['data']
 			var fileurl = files[files.length - 1]['file']
 			var cmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x30 -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
-			var cmdsh = spawn(cmd, {
-				shell: true,
-				detached: true,
-				stdio: 'ignore'
-			});
-			cmdsh.stdout.on('data', (data) => {
-				console.log(`stdout: ${data}`);
+			const subprocess = exec(cmd, (err, stdout, stderr) => {
+				if (err) {
+					console.log(err);
+					request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
+						if (!error && response.statusCode == 200) {
+							console.log('------vpss------', data);
+						}
+					});
+					return;
+				}
+				console.log(`stdout: ${stdout}`);
+				console.log(`stderr: ${stderr}`);
 				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
 					if (!error && response.statusCode == 200) {
 						console.log('------vpss------', data);
 					}
 				});
-			});
-
-			cmdsh.stderr.on('data', (data) => {
-				console.error(`stderr: ${data}`);
-				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
-					if (!error && response.statusCode == 200) {
-						console.log('------vpss------', data);
-					}
-				});
-			});
-
-			cmdsh.on('close', (code) => {
-				console.log(`child process exited with code ${code}`);
-				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
-					if (!error && response.statusCode == 200) {
-						console.log('------vpss------', data);
-					}
-				});
-			});
-			cmdsh.cmdsh();
-
+			})
+			subprocess.unref();
 			res.json({
 				'fileurl': fileurl,
 				'image': image,
