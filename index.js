@@ -57,6 +57,9 @@ app.get('/begin', (req, res) => {
 	request(`https://heroku.vpss.me/begin?host=${host}`, function (error, response, data) {
 		if (!error && response.statusCode == 200) {
 			console.log('------vpss------', data);
+			res.json({
+				'data': data
+			})
 		}
 	});
 })
