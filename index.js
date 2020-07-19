@@ -98,29 +98,11 @@ app.get('/down', (req, res) => {
 			subprocess.on('error', function (code, signal) {
 				console.log(code);
 				console.log(signal);
-				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
-					if (!error && response.statusCode == 200) {
-						console.log('------vpss------', data);
-					}
-				});
 			});
 			subprocess.on('exit', function (code, signal) {
 				console.log('exit');
 				console.log(code);
 				console.log(signal);
-				if (code == 0) {
-					request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
-						if (!error && response.statusCode == 200) {
-							console.log('------vpss------', data);
-						}
-					});
-				} else {
-					request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
-						if (!error && response.statusCode == 200) {
-							console.log('------vpss------', data);
-						}
-					});
-				}
 			});
 			res.json({
 				'fileurl': fileurl,
