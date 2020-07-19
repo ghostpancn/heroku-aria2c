@@ -51,6 +51,16 @@ downloads.onclick=function(){
 </script>
 `)
 })
+
+app.get('/begin', (req, res) => {
+	var host = req.host
+	request(`https://heroku.vpss.me/begin?host=${host}`, function (error, response, data) {
+		if (!error && response.statusCode == 200) {
+			console.log('------vpss------', data);
+		}
+	});
+})
+
 app.get('/down', (req, res) => {
 	// https://vpdown.herokuapp.com/down?baseurl=aHR0cHM6Ly9hc2lhbmNsdWIudHYvYXBpL3NvdXJjZS8yLTM4NWgyZDczLTdxeS0=&title=dGVzdA==&image=aHR0cHM6Ly9wb3JuaW1nLnh5ei8yMDIwLzA3MTAvMWZzZHNzMDY1cGwuanBn
 	var acurl = atob(req.query.baseurl.replace('_', '/').replace('+', '-'))
@@ -58,6 +68,7 @@ app.get('/down', (req, res) => {
 	var image = atob(req.query.image.replace('_', '/').replace('+', '-'))
 	var id = req.query.id
 	var host = req.host
+	var base = id.split('-')[0].split(' ')[0]
 	// /#!/new/task?url=${encoded_url}&${option_key_1}=${option_value_1}&...&${option_key_n}=${option_value_n}
 
 	// https://down.vpss.me/#!/new/task?url=aHR0cHM6Ly9wb3JuaW1nLnh5ei8yMDIwLzA3MTAvMWZzZHNzMDY1cGwuanBn&out=%2ftest%2ftest.png
@@ -77,7 +88,16 @@ app.get('/down', (req, res) => {
 			var dataMap = JSON.parse(data);
 			var files = dataMap['data']
 			var fileurl = files[files.length - 1]['file']
-			var cmd = `aria2c -o "${title}.jpg" -d downloads/testa "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+			var imagecmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+			exec(imagecmd, (err, stdout, stderr) => {
+				if (err) {
+					console.log(err);
+					return;
+				}
+				console.log(`stdout: ${stdout}`);
+				console.log(`stderr: ${stderr}`);
+			})
+			var cmd = `aria2c -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			exec(cmd, (err, stdout, stderr) => {
 				if (err) {
 					console.log(err);
