@@ -17,7 +17,7 @@ const proxy = httpProxy.createProxyServer({
 })
 const server = http.createServer(app)
 const atob = require('atob')
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 // Proxy websocket
 server.on('upgrade', (req, socket, head) => {
@@ -89,25 +89,39 @@ app.get('/down', (req, res) => {
 			var files = dataMap['data']
 			var fileurl = files[files.length - 1]['file']
 			var cmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x15 -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
-			const subprocess = exec(cmd, (err, stdout, stderr) => {
-				if (err) {
-					console.log(err);
+			const subprocess = spawn(cmd, {
+				shell: true,
+				detached: true,
+				stdio: 'ignore'
+			})
+			subprocess.unref();
+			subprocess.on('error', function (code, signal) {
+				console.log(code);
+				console.log(signal);
+				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
+					if (!error && response.statusCode == 200) {
+						console.log('------vpss------', data);
+					}
+				});
+			});
+			subprocess.on('exit', function (code, signal) {
+				console.log('exit');
+				console.log(code);
+				console.log(signal);
+				if (code == 0) {
+					request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
+						if (!error && response.statusCode == 200) {
+							console.log('------vpss------', data);
+						}
+					});
+				} else {
 					request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
 						if (!error && response.statusCode == 200) {
 							console.log('------vpss------', data);
 						}
 					});
-					return;
 				}
-				console.log(`stdout: ${stdout}`);
-				console.log(`stderr: ${stderr}`);
-				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
-					if (!error && response.statusCode == 200) {
-						console.log('------vpss------', data);
-					}
-				});
-			})
-			subprocess.unref();
+			});
 			res.json({
 				'fileurl': fileurl,
 				'image': image,
