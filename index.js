@@ -88,16 +88,8 @@ app.get('/down', (req, res) => {
 			var dataMap = JSON.parse(data);
 			var files = dataMap['data']
 			var fileurl = files[files.length - 1]['file']
-			var imagecmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
-			exec(imagecmd, (err, stdout, stderr) => {
-				if (err) {
-					console.log(err);
-					return;
-				}
-				console.log(`stdout: ${stdout}`);
-				console.log(`stderr: ${stderr}`);
-			})
-			var cmd = `aria2c -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+			var cmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && 
+			aria2c -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			exec(cmd, (err, stdout, stderr) => {
 				if (err) {
 					console.log(err);
