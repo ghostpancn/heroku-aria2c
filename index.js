@@ -90,6 +90,7 @@ app.get('/down', (req, res) => {
 			var fileurl = files[files.length - 1]['file']
 			var cmd = `aria2c -o "${title}.jpg" -d downloads/${base} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x30 -o "${title}.mp4" -d downloads/${base} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			var cmdsh = spawn(cmd, [], {
+				shell: true,
 				detached: true,
 				stdio: 'ignore'
 			});
