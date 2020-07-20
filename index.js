@@ -67,7 +67,7 @@ app.get('/begin', (req, res) => {
 app.get('/down', (req, res) => {
 	// https://vpdown.herokuapp.com/down?baseurl=aHR0cHM6Ly9hc2lhbmNsdWIudHYvYXBpL3NvdXJjZS8yLTM4NWgyZDczLTdxeS0=&title=dGVzdA==&image=aHR0cHM6Ly9wb3JuaW1nLnh5ei8yMDIwLzA3MTAvMWZzZHNzMDY1cGwuanBn
 	var acurl = atob(req.query.baseurl.replace('_', '/').replace('+', '-'))
-	var title = unescape(atob(req.query.title.replace('_', '/').replace('+', '-'))).replace('/', '\\')
+	var title = unescape(atob(req.query.title.replace('_', '/').replace('+', '-'))).replace('/', '\\').substring(0, 90)
 	var image = atob(req.query.image.replace('_', '/').replace('+', '-'))
 	var id = req.query.id
 	var host = req.host

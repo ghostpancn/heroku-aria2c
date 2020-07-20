@@ -29,7 +29,7 @@ echo "$(($(cat numUpload)+1))" > numUpload # Plus 1
 echo "numUpload -> $(($(cat numUpload)+1))" >> ./downloads/downlog.txt
 
 if [[ $2 -eq 1 ]]; then # single file
-    fileIDPath=${$3%/*}
+    fileIDPath=${filePath%/*}
     remote="DRIVE:$RCLONE_DESTINATION/${relativePath%/*}"
     echo "begin $fileIDPath to $remote ..." >> ./downloads/downlog.txt
 	rclone -v --config="rclone.conf" copy "$fileIDPath" "$remote" 2>&1	
