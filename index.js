@@ -86,7 +86,7 @@ app.get('/down', (req, res) => {
 
 	// 	}
 	// });
-	fetchFileUrls(acurls, fileUrls, function () {
+	fetchFileUrls(acurls, fileUrls, function (fileUrls) {
 		var filescmd = ''
 		if (fileUrls.length == 1) {
 			var fileurl = fileUrls[0]
@@ -175,7 +175,7 @@ function fetchFileUrls(acurls, fileUrls, callback) {
 			if (length < acurls.length) {
 				fetchFileUrls(acurls, fileUrls, callback)
 			} else {
-				callback && callback()
+				callback && callback(fileUrls)
 			}
 		}
 	})
