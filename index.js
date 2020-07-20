@@ -89,15 +89,17 @@ app.get('/down', (req, res) => {
 	fetchFileUrls(acurls, fileUrls, function () {
 		var filescmd = ''
 		if (fileUrls.length == 1) {
-			filescmd += `aria2c -x15 -o "${title}.mp4" -d downloads/${id} "${fileUrls[0]}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+			var fileurl = fileUrls[0]
+			filescmd += `aria2c -x15 -o "${title}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 		} else {
 			var suffixs = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 			for (var i = 0, len = fileUrls.length; i < len; i++) {
 				var fileurl = fileUrls[i]
+				var suffix = suffixs[i]
 				if (i != 0) {
 					fileUrls += ' && '
 				}
-				fileUrls += `aria2c -x15 -o "${title} - ${suffixs[i]}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+				fileUrls += `aria2c -x15 -o "${title} - ${suffix}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			}
 		}
 		var cmd = `echo -e "$(date +"%m/%d %H:%M:%S") begin downloading ${id}" >> ./downloads/downlog.txt && aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && ${filescmd}`
