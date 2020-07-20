@@ -163,7 +163,7 @@ app.get('/down', (req, res) => {
 server.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`))
 
 function fetchFileUrls(acurls, fileUrls, callback) {
-	request.post({ url: acurl }, function (error, response, data) {
+	request.post({ url: acurls[fileUrls.length] }, function (error, response, data) {
 		if (!error && response.statusCode == 200) {
 			console.log('------ac------', data);
 			var dataMap = JSON.parse(data);
