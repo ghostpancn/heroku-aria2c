@@ -9,7 +9,7 @@ if [[ -n $RCLONE_CONFIG && -n $RCLONE_DESTINATION ]]; then
 	chmod +x on-complete.sh
 fi
 
-if [[ -n $RCLONE_SA]]; then
+if [[ -n $RCLONE_SA ]]; then
 	echo "Rclone config sa detected"
 	echo -e "$RCLONE_SA" > sa.json
 fi
