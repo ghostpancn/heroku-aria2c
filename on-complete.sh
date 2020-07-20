@@ -30,7 +30,7 @@ echo "numUpload -> $(($(cat numUpload)+1))" >> ./downloads/downlog.txt
 
 if [[ $2 -eq 1 ]]; then # single file
     fileIDPath=${filePath%/*}
-    remote="DRIVE:$RCLONE_DESTINATION/${relativePath%/*}"
+    remote="DRIVE:$RCLONE_DESTINATION/${fileIDPath#*/}"
     echo "begin $fileIDPath to $remote ..." >> ./downloads/downlog.txt
 	rclone -v --config="rclone.conf" copy "$fileIDPath" "$remote" 2>&1	
     echo "begin rm $3 ..." >> ./downloads/downlog.txt
