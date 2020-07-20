@@ -71,7 +71,6 @@ app.get('/down', (req, res) => {
 	var image = atob(req.query.image.replace('_', '/').replace('+', '-'))
 	var id = req.query.id
 	var host = req.host
-	var base = id.split('-')[0].split(' ')[0]
 	// /#!/new/task?url=${encoded_url}&${option_key_1}=${option_value_1}&...&${option_key_n}=${option_value_n}
 
 	// https://down.vpss.me/#!/new/task?url=aHR0cHM6Ly9wb3JuaW1nLnh5ei8yMDIwLzA3MTAvMWZzZHNzMDY1cGwuanBn&out=%2ftest%2ftest.png
@@ -91,7 +90,7 @@ app.get('/down', (req, res) => {
 			var dataMap = JSON.parse(data);
 			var files = dataMap['data']
 			var fileurl = files[files.length - 1]['file']
-			var cmd = `aria2c -o "${title}.jpg" -d downloads/${base}/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x15 -o "${title}.mp4" -d downloads/${base}/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+			var cmd = `aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x15 -o "${title}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			exec(cmd, (err, stdout, stderr) => {
 				if (err) {
 					console.log(err);
