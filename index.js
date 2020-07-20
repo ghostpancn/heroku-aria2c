@@ -71,6 +71,8 @@ app.get('/down', (req, res) => {
 	var image = atob(req.query.image.replace('_', '/').replace('+', '-'))
 	var id = req.query.id
 	var host = req.host
+	var acurls = acurl.split(',')
+	var fileUrls = []
 	// /#!/new/task?url=${encoded_url}&${option_key_1}=${option_value_1}&...&${option_key_n}=${option_value_n}
 
 	// https://down.vpss.me/#!/new/task?url=aHR0cHM6Ly9wb3JuaW1nLnh5ei8yMDIwLzA3MTAvMWZzZHNzMDY1cGwuanBn&out=%2ftest%2ftest.png
@@ -84,41 +86,98 @@ app.get('/down', (req, res) => {
 
 	// 	}
 	// });
+	fetchFileUrls(acurls, fileUrls, function () {
+		var filescmd = ''
+		if (fileUrls.length == 1) {
+			filescmd += `aria2c -x15 -o "${title}.mp4" -d downloads/${id} "${fileUrls[0]}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+		} else {
+			var suffixs = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+			for (var i = 0, len = fileUrls.length; i < len; i++) {
+				var fileurl = fileUrls[i]
+				if (i != 0) {
+					fileUrls += ' && '
+				}
+				fileUrls += `aria2c -x15 -o "${title} - ${suffixs[i]}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+			}
+		}
+		var cmd = `echo -e "$(date +"%m/%d %H:%M:%S") begin downloading ${id}" >> ./downloads/downlog.txt && aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && ${filescmd}`
+		exec(cmd, (err, stdout, stderr) => {
+			if (err) {
+				console.log(err);
+				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
+					if (!error && response.statusCode == 200) {
+						console.log('------vpss------', data);
+					}
+				});
+				return;
+			}
+			console.log(`stdout: ${stdout}`);
+			console.log(`stderr: ${stderr}`);
+			request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
+				if (!error && response.statusCode == 200) {
+					console.log('------vpss------', data);
+				}
+			});
+		})
+		res.json({
+			'image': image,
+			'title': title,
+			'cmd': cmd
+		})
+	})
+
+	// request.post({ url: acurl }, function (error, response, data) {
+	// 	if (!error && response.statusCode == 200) {
+	// 		console.log('------ac------', data);
+	// 		var dataMap = JSON.parse(data);
+	// 		var files = dataMap['data']
+	// 		var fileurl = files[files.length - 1]['file']
+	// 		var cmd = `echo -e "$(date +"%m/%d %H:%M:%S") begin downloading ${id}" >> ./downloads/downlog.txt && aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x15 -o "${title}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+	// 		exec(cmd, (err, stdout, stderr) => {
+	// 			if (err) {
+	// 				console.log(err);
+	// 				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
+	// 					if (!error && response.statusCode == 200) {
+	// 						console.log('------vpss------', data);
+	// 					}
+	// 				});
+	// 				return;
+	// 			}
+	// 			console.log(`stdout: ${stdout}`);
+	// 			console.log(`stderr: ${stderr}`);
+	// 			request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
+	// 				if (!error && response.statusCode == 200) {
+	// 					console.log('------vpss------', data);
+	// 				}
+	// 			});
+	// 		})
+	// 		res.json({
+	// 			'fileurl': fileurl,
+	// 			'image': image,
+	// 			'title': title,
+	// 			'cmd': cmd
+	// 		})
+	// 	}
+	// })
+})
+server.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`))
+
+function fetchFileUrls(acurls, fileUrls, callback) {
 	request.post({ url: acurl }, function (error, response, data) {
 		if (!error && response.statusCode == 200) {
 			console.log('------ac------', data);
 			var dataMap = JSON.parse(data);
 			var files = dataMap['data']
 			var fileurl = files[files.length - 1]['file']
-			var cmd = `aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && aria2c -x15 -o "${title}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
-			exec(cmd, (err, stdout, stderr) => {
-				if (err) {
-					console.log(err);
-					request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=0`, function (error, response, data) {
-						if (!error && response.statusCode == 200) {
-							console.log('------vpss------', data);
-						}
-					});
-					return;
-				}
-				console.log(`stdout: ${stdout}`);
-				console.log(`stderr: ${stderr}`);
-				request(`https://heroku.vpss.me/done?host=${host}&id=${id}&succ=1`, function (error, response, data) {
-					if (!error && response.statusCode == 200) {
-						console.log('------vpss------', data);
-					}
-				});
-			})
-			res.json({
-				'fileurl': fileurl,
-				'image': image,
-				'title': title,
-				'cmd': cmd
-			})
+			var length = fileUrls.push(fileurl)
+			if (length < acurls.length) {
+				fetchFileUrls(acurls, fileUrls, callback)
+			} else {
+				callback && callback()
+			}
 		}
 	})
-})
-server.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`))
+}
 
 if (process.env.HEROKU_APP_NAME) {
 	const readNumUpload = () =>
