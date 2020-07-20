@@ -18,6 +18,12 @@ elif [ -e "${topPath}.aria2" ]; then
     rm -vf "${topPath}.aria2"
 fi
 echo -e "$(date +"%m/%d %H:%M:%S") ${INFO} Delete .aria2 file finish"
+
+imageSuffix = ".jpg"
+if [[ $3 == *$imageSuffix ]]; then
+    exit
+fi
+
 echo "$(($(cat numUpload)+1))" > numUpload # Plus 1
 
 if [[ $2 -eq 1 ]]; then # single file
