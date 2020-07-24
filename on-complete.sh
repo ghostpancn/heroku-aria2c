@@ -19,12 +19,6 @@ elif [ -e "${topPath}.aria2" ]; then
 fi
 echo -e "$(date +"%m/%d %H:%M:%S") ${INFO} Delete .aria2 file finish" >> ./downloads/downlog.txt
 
-imageSuffix=".jpg"
-if [[ $3 == *$imageSuffix ]]; then
-    echo "$3 -> image exit!" >> ./downloads/downlog.txt
-    exit
-fi
-
 echo "$(($(cat numUpload)+1))" > numUpload # Plus 1
 echo "numUpload -> $(($(cat numUpload)+1))" >> ./downloads/downlog.txt
 
