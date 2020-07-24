@@ -97,9 +97,9 @@ app.get('/down', (req, res) => {
 				var fileurl = fileUrls[i]
 				var suffix = suffixs[i]
 				if (i != 0) {
-					fileUrls += ' && '
+					filescmd += ' && '
 				}
-				fileUrls += `aria2c -x15 -o "${title} - ${suffix}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+				filescmd += `aria2c -x15 -o "${title} - ${suffix}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			}
 		}
 		var cmd = `echo -e "$(date +"%m/%d %H:%M:%S") begin downloading ${id}" >> ./downloads/downlog.txt && aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && ${filescmd}`
