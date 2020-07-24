@@ -25,16 +25,25 @@ if [[ $3 == *$imageSuffix ]]; then
     exit
 fi
 
+fileIDPath=${filePath%/*}
+
+sleep 10s
+
+find $fileIDPath -name "*.aria2" | while read i
+do 
+echo "$i exit!" >> ./downloads/downlog.txt
+exit
+done
+
 echo "$(($(cat numUpload)+1))" > numUpload # Plus 1
 echo "numUpload -> $(($(cat numUpload)+1))" >> ./downloads/downlog.txt
 
 if [[ $2 -eq 1 ]]; then # single file
-    fileIDPath=${filePath%/*}
     remote="DRIVE:$RCLONE_DESTINATION/${fileIDPath#*/}"
     echo "begin $fileIDPath to $remote ..." >> ./downloads/downlog.txt
 	rclone -v --config="rclone.conf" copy "$fileIDPath" "$remote" 2>&1	
-    echo "begin rm $3 ..." >> ./downloads/downlog.txt
-    rm -vf "$3"
+    echo "begin rm $fileIDPath ..." >> ./downloads/downlog.txt
+    rm -rf "$fileIDPath"
 elif [[ $2 -gt 1 ]]; then # multiple file
 	rclone -v --config="rclone.conf" copy "$topPath" "DRIVE:$RCLONE_DESTINATION/${relativePath%%/*}"
     rm -rf "$topPath"

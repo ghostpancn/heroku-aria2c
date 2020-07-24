@@ -90,7 +90,7 @@ app.get('/down', (req, res) => {
 		var filescmd = ''
 		if (fileUrls.length == 1) {
 			var fileurl = fileUrls[0]
-			filescmd += `aria2c -x15 -o "${title}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+			filescmd += `aria2c -x15 -o "${title}.mp4" -d downloads/${id} "${fileurl}" --split=64 --max-concurrent-downloads=10 --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 		} else {
 			var suffixs = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 			for (var i = 0, len = fileUrls.length; i < len; i++) {
@@ -99,7 +99,7 @@ app.get('/down', (req, res) => {
 				if (i != 0) {
 					filescmd += ' && '
 				}
-				filescmd += `aria2c -x15 -o "${title} - ${suffix}.mp4" -d downloads/${id} "${fileurl}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
+				filescmd += `aria2c -x15 -o "${title} - ${suffix}.mp4" -d downloads/${id} "${fileurl}" --split=64 --max-concurrent-downloads=10 --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			}
 		}
 		var cmd = `echo -e "$(date +"%m/%d %H:%M:%S") begin downloading ${id}" >> ./downloads/downlog.txt && aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && ${filescmd}`
