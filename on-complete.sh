@@ -20,14 +20,13 @@ fi
 echo -e "$(date +"%m/%d %H:%M:%S") ${INFO} Delete .aria2 file finish" >> ./downloads/downlog.txt
 
 echo "$(($(cat numUpload)+1))" > numUpload # Plus 1
-echo "numUpload -> $(($(cat numUpload)+1))" >> ./downloads/downlog.txt
 
 if [[ $2 -eq 1 ]]; then # single file
     fileIDPath=${filePath%/*}
     remote="DRIVE:$RCLONE_DESTINATION/${fileIDPath#*/}"
     echo "$(date +"%m/%d %H:%M:%S") ${INFO} $3 upload to $remote ..." >> ./downloads/downlog.txt
     rclone -v --config="rclone.conf" copy "$3" "$remote" 2>&1
-    echo "$(date +"%m/%d %H:%M:%S") ${INFO} $i uploaded and rm ..." >> ./downloads/downlog.txt
+    echo "$(date +"%m/%d %H:%M:%S") ${INFO} uploaded and rm ..." >> ./downloads/downlog.txt
     rm -vf "$3"
 elif [[ $2 -gt 1 ]]; then # multiple file
 	rclone -v --config="rclone.conf" copy "$topPath" "DRIVE:$RCLONE_DESTINATION/${relativePath%%/*}"
@@ -36,4 +35,3 @@ elif [[ $2 -gt 1 ]]; then # multiple file
 fi
 
 echo "$(($(cat numUpload)-1))" > numUpload # Minus 1
-echo "numUpload -> $(($(cat numUpload)-1))" >> ./downloads/downlog.txt

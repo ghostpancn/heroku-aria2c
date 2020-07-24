@@ -102,7 +102,7 @@ app.get('/down', (req, res) => {
 				filescmd += `aria2c -x15 -o "${title} - ${suffix}.mp4" -d downloads/${id} "${fileurl}" --split=64 --max-concurrent-downloads=10 --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh`
 			}
 		}
-		var cmd = `echo -e "$(date +"%m/%d %H:%M:%S") begin downloading ${id}" >> ./downloads/downlog.txt && aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && ${filescmd}`
+		var cmd = `echo "----------$(date +"%m/%d %H:%M:%S") begin downloading ${id}----------" >> ./downloads/downlog.txt && aria2c -o "${title}.jpg" -d downloads/${id} "${image}" --on-download-complete=./on-complete.sh --on-download-stop=./delete.sh && ${filescmd}`
 		exec(cmd, (err, stdout, stderr) => {
 			if (err) {
 				console.log(err);
