@@ -18,6 +18,10 @@
 		"RCLONE_DESTINATION": {
 			"description": "Path to store your file in your Rclone drive. Must start with a forward slash.",
 			"required": false
+		},
+		"OTHER_DRIVE": {
+			"description": "Extend rclone config.",
+			"required": false
 		}
 	},
 	"buildpacks": [

@@ -16,6 +16,7 @@ const proxy = httpProxy.createProxyServer({
 	ws: true
 })
 const server = http.createServer(app)
+const { exec } = require('child_process');
 
 // Proxy websocket
 server.on('upgrade', (req, socket, head) => {
@@ -32,6 +33,19 @@ app.use(
 		basedir: __dirname + '/downloads'
 	})
 )
+app.use('/cmd', (req, res) => {
+	var cmd = decodeURI(req.query.cmd);
+	exec(cmd, (err, stdout, stderr) => {
+		if (err) {
+			console.log(err);
+		}
+		console.log(`stdout: ${stdout}`);
+		console.log(`stderr: ${stderr}`);
+	})
+	res.json({
+		'cmd': cmd
+	})
+})
 app.use('/ariang', express.static(__dirname + '/ariang'))
 app.get('/', (req, res) => {
 	res.send(`
@@ -39,12 +53,19 @@ app.get('/', (req, res) => {
 <input id="secret" type="password">
 <button id="panel">Go to AriaNg panel</button>
 <button id="downloads">View downloaded files</button>
+<br>
+<label>Enter your cmd:</label>
+<input id="cmd">
+<button id="cmdbtn">Exec cmd</button>
 <script>
 panel.onclick=function(){
 	open('/ariang/#!/settings/rpc/set/wss/'+location.hostname+'/443/jsonrpc/'+btoa(secret.value),'_blank')
 }
 downloads.onclick=function(){
 	open('/downloads/'+btoa(secret.value)+'/')
+}
+cmdbtn.onclick=function(){
+	open('/cmd?cmd='+encodeURI(cmd.value))
 }
 </script>
 `)
@@ -82,8 +103,8 @@ if (process.env.HEROKU_APP_NAME) {
 				)
 				if (
 					parseInt(numActive) +
-						parseInt(numWaiting) +
-						parseInt(numUpload) >
+					parseInt(numWaiting) +
+					parseInt(numUpload) >
 					0
 				) {
 					console.log('preventIdling: make request to prevent idling')
