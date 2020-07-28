@@ -57,6 +57,12 @@ app.get('/', (req, res) => {
 <label>Enter your cmd:</label>
 <input id="cmd">
 <button id="cmdbtn">Exec cmd</button>
+<br>
+<label>Enter your from path</label>
+<input id="frompath">
+<label>Enter your to path</label>
+<input id="topath">
+<button id="clone">Begin clone</button>
 <script>
 panel.onclick=function(){
 	open('/ariang/#!/settings/rpc/set/wss/'+location.hostname+'/443/jsonrpc/'+btoa(secret.value),'_blank')
@@ -66,6 +72,9 @@ downloads.onclick=function(){
 }
 cmdbtn.onclick=function(){
 	open('/cmd?cmd='+encodeURI(cmd.value))
+}
+clone.onclick=function(){
+	open('/cmd?cmd='+encodeURI('rclone -v --config=\"rclone.conf\" copy from:'+frompath.value+' to:'+topath.value+' > \"downloads/clone.txt\" 2>&1'))
 }
 </script>
 `)
