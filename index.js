@@ -74,7 +74,7 @@ cmdbtn.onclick=function(){
 	open('/cmd?cmd='+encodeURI(cmd.value))
 }
 clone.onclick=function(){
-	open('/cmd?cmd='+encodeURI('rclone -v --config=\"rclone.conf\" copy from:'+frompath.value+' to:'+topath.value+' > \"downloads/clone.txt\" 2>&1'))
+	open('/cmd?cmd='+encodeURI('rclone -v --config=\"rclone.conf\" copy from:'+frompath.value+' to:'+topath.value+' > \"downloads/clone.txt\" 2>\&1'))
 }
 </script>
 `)
