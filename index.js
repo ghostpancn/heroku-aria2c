@@ -48,8 +48,6 @@ app.get('/', (req, res) => {
 <input id="downtitle">
 <label>downURL:</label>
 <input id="downurl">
-<label>downURL:</label>
-<input id="downurl">
 <label>downIMG:</label>
 <input id="downimg">
 <button id="downbtn">Exec down</button>
