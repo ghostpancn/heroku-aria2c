@@ -41,12 +41,27 @@ app.get('/', (req, res) => {
 <input id="secret" type="password">
 <button id="panel">Go to AriaNg panel</button>
 <button id="downloads">View downloaded files</button>
+<br>
+<label>downID:</label>
+<input id="downid">
+<label>downTitle:</label>
+<input id="downtitle">
+<label>downURL:</label>
+<input id="downurl">
+<label>downURL:</label>
+<input id="downurl">
+<label>downIMG:</label>
+<input id="downimg">
+<button id="downbtn">Exec down</button>
 <script>
 panel.onclick=function(){
 	open('/ariang/#!/settings/rpc/set/wss/'+location.hostname+'/443/jsonrpc/'+btoa(secret.value),'_blank')
 }
 downloads.onclick=function(){
 	open('/downloads/'+btoa(secret.value)+'/')
+}
+downbtn.onclick=function(){
+	open('/down?baseurl='+btoa(downurl.value)+'&title='+btoa(downtitle.value)+'&image='+btoa(downimg.value)+'&id='+downid.value)
 }
 </script>
 `)
